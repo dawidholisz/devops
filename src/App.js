@@ -20,7 +20,7 @@ function App() {
                 ? <h1>Loading</h1>
                 : state.value && (
                     <div data-testId="posts-block">
-                        <h1>Post from API:</h1>
+                        <h1>Post:</h1>
                         {state?.value.map(post =>
                             <article key={post.id} data-testId={`post-${post.id}`}>
                             <h2 data-testId="post-title">{post.title}</h2>
