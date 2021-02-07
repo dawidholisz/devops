@@ -1,4 +1,4 @@
-name: Newman Run
+name: Tests and Deploy
 
 on:
   push:
@@ -7,15 +7,18 @@ on:
 
 jobs:
   newman:
+    name: 'API Tests'
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@master
-      - uses: matt-ball/newman-action@master
+      - uses: anthonyvscode/newman-action@v1
         with:
           collection: api_tests.json
+          reporters: cli
   cypress-run:
-    runs-on: ubuntu-16.04
+    name: 'E2E Tests'
     needs: [newman]
+    runs-on: ubuntu-16.04
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -23,3 +26,15 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           start: npm start
+  deploy:
+    name: 'Deploy to Netlify'
+    runs-on: ubuntu-16.04
+    needs: [cypress-run]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: jsmrcaga/action-netlify-deploy@v1.1.0
+        with:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.MY_TOKEN_SECRET }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE  }}
+          NETLIFY_DEPLOY_MESSAGE: "Prod deploy v${{ github.ref }}"
+          NETLIFY_DEPLOY_TO_PROD: true
